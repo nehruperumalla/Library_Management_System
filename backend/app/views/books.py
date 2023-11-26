@@ -4,7 +4,7 @@ import json
 from bson import json_util
 from bson.objectid import ObjectId
 import re
-from .dummy_data import books
+from .dummy_data import books, locations
 
 books_bp = Blueprint("books", __name__)
 
@@ -65,7 +65,17 @@ def search_by_item():
     print(docs)
     return docs, 200
 
-@books_bp.route('/init', methods=["POST"])
+@books_bp.route('/init', methods=["GET"])
 def load_dummy_books():
-    mongo.db.books.insert_many(books), 200
+    mongo.db.books.insert_many(books)
+    mongo.db.locations.insert_many(locations)
+    books_dta = mongo.db.books.find()
+    locations_dta = mongo.db.locations.find()
+    books_data = [serialize_doc(book) for book in books_dta]
+    locations_data = [serialize_doc(location) for location in locations_dta]
+    data = {"book_id":books_data[0]["_id"], "location_id":locations_data[0]["_id"], "location_name":locations_data[0]["name"], "book_name":books_data[0]["title"]}
+    mongo.db.stores.insert_one(data)
+
+    data = {"book_id":books_data[1]["_id"], "location_id":locations_data[1]["_id"], "location_name":locations_data[1]["name"], "book_name":books_data[1]["title"]}
+    mongo.db.stores.insert_one(data)
     return "true", 200

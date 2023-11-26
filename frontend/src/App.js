@@ -9,6 +9,7 @@ import Locations from './components/Locations';
 import Books from './components/Books';
 import Stores from './components/Stores';
 import SearchBooks from './components/SearchBooks';
+import MyBooks from './components/MyBooks';
 function App() {
   return (
     <div>
@@ -23,6 +24,7 @@ function App() {
                 <Route path='/admin/books' element={<Books />}/>
                 <Route path='/admin/stores' element={<Stores />}/>
                 <Route path='/search' element={<SearchBooks/>}/>
+                <Route path='/mybooks' element={<MyBooks/>}/>
             </Routes>
         </Router>
         </div>

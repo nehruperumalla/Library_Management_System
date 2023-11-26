@@ -20,7 +20,7 @@ const HomePage = () => {
                 <Link to="/search" >
                     <button style={styles.button}>Search</button>
                 </Link>
-                <Link to="/myBooks">
+                <Link to="/mybooks">
                 <button style={styles.button}>My Books</button>
                 </Link>
                 
