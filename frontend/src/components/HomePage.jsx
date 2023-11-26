@@ -1,22 +1,29 @@
 import React from 'react';
-import { useLocation, /* other hooks */ } from 'react-router-dom';
+import { Link, useLocation, /* other hooks */ } from 'react-router-dom';
 import bg_img from '../static/lms_bg.png';
 // Inside HomePage.js
+
 
 const HomePage = () => {
     //   const firstName = user ? user.firstName : 'Guest';
     const location = useLocation()
+    let userData = JSON.parse(localStorage.getItem("user"))
 
     return (
             <div style={{backgroundImage: `url(${bg_img})`, backgroundRepeat:'no-repeat',backgroundSize:'100% 100%', backgroundPosition:'center', minHeight:'100vh', minWidth:'200vh'}}>
             <div style={styles.container}>
                 <div style={styles.header}>
-                    <div style={styles.greeting}>Hi, {location.state.data}</div>
+                    <div style={styles.greeting}>Hi, {userData["username"]}</div>
                     <div style={styles.title}>Library Management System</div>
                 </div>
                 <div style={styles.buttonContainer}>
+                <Link to="/search" >
                     <button style={styles.button}>Search</button>
-                    <button style={styles.button}>My Books</button>
+                </Link>
+                <Link to="/myBooks">
+                <button style={styles.button}>My Books</button>
+                </Link>
+                
                 </div>
             </div>
             </div>

@@ -12,16 +12,18 @@ const LoginPage = () => {
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post('http://localhost:5000/auth/login/', {
+      const response = await axios.post('http://localhost:5000/auth/login', {
         username,
         password,
       });
 
       if (response.status === 200) {
         // Login successful, navigate to the home page
-        let firstName = response.data
         console.log(response.data)
-        navigate('/home', {state:{data:firstName}});
+        let userData = response.data
+        localStorage.setItem("user", JSON.stringify(userData))
+        console.log(localStorage.getItem("user"))
+        navigate('/home');
         console.log('Login successful');
       } else {
         // Login failed, show an error message

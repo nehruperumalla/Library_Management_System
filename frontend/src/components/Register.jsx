@@ -3,21 +3,25 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 
 const Register = () => {
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
+  const [userName, setUserName] = useState('');
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [address, setAddress] = useState('');
+  const [phoneNum, setPhoneNum] = useState('')
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
       // Replace 'YOUR_BACKEND_API_ENDPOINT' with your actual backend API endpoint
-      const response = await axios.post('http://localhost:5000/auth/register/', {
-        firstName,
-        lastName,
-        email,
-        password,
+      const response = await axios.post('http://localhost:5000/auth/register', {
+        username: userName,
+        name: name,
+        email: email,
+        password: password,
+        address: address,
+        phone: phoneNum
       });
 
       console.log('Registration successful:', response.data);
@@ -33,20 +37,20 @@ const Register = () => {
       <h2 style={styles.title}>Registration</h2>
       <form onSubmit={handleSubmit} style={styles.form}>
         <label style={styles.label}>
-          First Name
+          User Name
           <input
             type="text"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
+            value={userName}
+            onChange={(e) => setUserName(e.target.value)}
             style={styles.input}
           />
         </label>
         <label style={styles.label}>
-          Last Name
+          Full Name
           <input
             type="text"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
             style={styles.input}
           />
         </label>
@@ -65,6 +69,24 @@ const Register = () => {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            style={styles.input}
+          />
+        </label>
+        <label style={styles.label}>
+          Address
+          <input
+            type="text"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            style={styles.input}
+          />
+        </label>
+        <label style={styles.label}>
+          Phone Num
+          <input
+            type="text"
+            value={phoneNum}
+            onChange={(e) => setPhoneNum(e.target.value)}
             style={styles.input}
           />
         </label>

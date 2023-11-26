@@ -1,23 +1,49 @@
 from flask import Blueprint, render_template
+from ..db import mongo
+from bson.objectid import ObjectId
+import json
 
 main_bp = Blueprint("main", __name__)
 
+def serialize_doc(doc):
+    """Custom serialization function to convert ObjectId to string."""
+    serialized = json.dumps(doc, default=str)
+    return json.loads(serialized)
 
-@main_bp.route("/", methods=('GET', 'POST'))
-def login():
-    return "HEY MAIN"
+@main_bp.route("/getUser/<user_id>", methods=["GET"])
+def get_user(user_id):
+    print('In Get User', user_id)
+    user_data = mongo.db.members.find_one({'_id':ObjectId(user_id)})
+    # print(serialize_doc(user_data))
+    return serialize_doc(user_data), 200
 
+def get_dummy_data():
+    admin = {
+        "username":"admin",
+        "password":"admin"
+    }
 
-# @main_bp.route("/data_load", methods=('PUT'))
-# def init_data():
-#     pass
+    store = [
+        {"store_id":1, "location_id":1, "book_id":1, }
+    ]
 
+    payments = [
+        {"user_id":""}
+    ]
 
-def get_location_data():
-    return [
-        {'location-id': 1, 'name':'Abernathy Public Library', 'address':'811 Avenue D', 'city':'Abernathy', 'state':'Texas', 'zipcode':'79311' },
-        {'location-id': 1, 'name':'Abernathy Public Library', 'address':'811 Avenue D', 'city':'Abernathy', 'state':'Texas', 'zipcode':'79311' },
-        {'location-id': 1, 'name':'Abernathy Public Library', 'address':'811 Avenue D', 'city':'Abernathy', 'state':'Texas', 'zipcode':'79311' },
-        {'location-id': 1, 'name':'Abernathy Public Library', 'address':'811 Avenue D', 'city':'Abernathy', 'state':'Texas', 'zipcode':'79311' },
+    transactions = [
+        {}
+    ]
 
+    members = [
+        {
+            "username":"Alice", 
+            "name":"Alice Parker", 
+            "email":"alice@gmail.com", 
+            "contact_info": {
+                "address": "456 Library Ave",
+                "phone": "+9876543210"
+            },
+            "books": ["Rich Dad Poor Dad", "DBMS"]
+         }
     ]

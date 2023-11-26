@@ -6,6 +6,9 @@ import LandingPage from './components/LandingPage';
 import HomePage from './components/HomePage';
 import AdminHomePage from './components/AdminHomePage';
 import Locations from './components/Locations';
+import Books from './components/Books';
+import Stores from './components/Stores';
+import SearchBooks from './components/SearchBooks';
 function App() {
   return (
     <div>
@@ -17,6 +20,9 @@ function App() {
                 <Route path='/home' element={<HomePage />}/>
                 <Route path='/admin' element={<AdminHomePage />}/>
                 <Route path='/admin/locations' element={<Locations />}/>
+                <Route path='/admin/books' element={<Books />}/>
+                <Route path='/admin/stores' element={<Stores />}/>
+                <Route path='/search' element={<SearchBooks/>}/>
             </Routes>
         </Router>
         </div>
