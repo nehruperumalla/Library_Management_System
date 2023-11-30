@@ -17,6 +17,7 @@ def serialize_doc(doc):
 @payments_bp.route('/create', methods=['POST'])
 def make_payment():
     data = request.json
+    print(data)
     payment_info = {
         "user_id":data['user_id'],
         "username":data['username'],
@@ -30,11 +31,11 @@ def make_payment():
             "card_holder":data['card']['card_holder']
         }
     }
-    inserted_rec = mongo.db.lms.payments.insert_one(payment_info)
-    return inserted_rec.inserted_id, 200
+    inserted_rec = mongo.db.payments.insert_one(payment_info)
+    return str(inserted_rec.inserted_id), 200
 
 @payments_bp.route('/fetch', methods=["GET"])
 def fetch_payments():
-    payments_data = list(mongo.db.locations.find())
+    payments_data = list(mongo.db.payments.find())
     data_to_send = [serialize_doc(doc) for doc in payments_data]
     return jsonify(data_to_send), 200
