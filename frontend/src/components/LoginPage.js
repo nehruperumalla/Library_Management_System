@@ -23,7 +23,12 @@ const LoginPage = () => {
         let userData = response.data
         localStorage.setItem("user", JSON.stringify(userData))
         console.log(localStorage.getItem("user"))
+        if(username === 'admin') {
+          navigate('/admin')
+        } else {
         navigate('/home');
+
+        }
         console.log('Login successful');
       } else {
         // Login failed, show an error message

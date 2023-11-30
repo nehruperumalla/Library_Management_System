@@ -2,267 +2,163 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const Stores = () => {
-  const [stores, setStores] = useState([
-    { id: 1, name: 'Bookstore A', location: 'City A' },
-    { id: 2, name: 'Bookstore B', location: 'City B' },
-    // Add more stores as needed
-  ]);
+  const [locations, setLocations] = useState([]);
+  const [books, setBooks] = useState([]);
+  const [locationBookPairs, setLocationBookPairs] = useState([]);
+  const [currentLocationId, setCurrentLocationId] = useState('');
+  const [currentBookId, setCurrentBookId] = useState('');
 
-  const [selectedStore, setSelectedStore] = useState(null);
-
-  // Maintain a state for pairs for each store
-  const [storePairs, setStorePairs] = useState({});
-
-  const [books, setBooks] = useState([
-    'Book 1',
-    'Book 2',
-    'Book 3',
-    // Add more books as needed
-  ]);
-
-  const [locations, setLocations] = useState([
-    'Location A',
-    'Location B',
-    'Location C',
-    // Add more locations as needed
-  ]);
-
-  const [isModalOpen, setModalOpen] = useState(false);
-
+  // Fetch data from the APIs on component load
   useEffect(() => {
-    // Initialize the storePairs state based on the stores
-    const initialPairs = {};
-    stores.forEach((store) => {
-      initialPairs[store.id] = [];
-    });
-    setStorePairs(initialPairs);
-  }, [stores]);
+    const fetchLocations = async () => {
+      try {
+        const response = await axios.get('http://127.0.0.1:5000/locations/fetch');
+        setLocations(response.data);
+      } catch (error) {
+        console.error('Error fetching locations:', error);
+      }
+    };
 
-  const openModalForEdit = (store) => {
-    const pairsForStore = storePairs[store.id] || [];
-    setSelectedStore(store);
-    setStorePairs({ ...storePairs, [store.id]: pairsForStore });
-    setModalOpen(true);
+    const fetchBooks = async () => {
+      try {
+        const response = await axios.get('http://127.0.0.1:5000/books/fetch');
+        setBooks(response.data);
+      } catch (error) {
+        console.error('Error fetching books:', error);
+      }
+    };
+
+    const fechLocationBookPairs = async () => {
+      try {
+        const response = await axios.get('http://127.0.0.1:5000/stores/fetch');
+        setLocationBookPairs(response.data)
+      } catch (error) {
+        console.error('Error Fetching Location Book Pairs', error)
+      }
+    }
+
+    fetchLocations();
+    fetchBooks();
+    fechLocationBookPairs();
+  }, []);
+
+  const addBookToLocation = async () => {
+    if (currentLocationId && currentBookId) {
+      // Find the location and book objects based on their IDs
+      const selectedLocation = locations.find((loc) => loc._id === currentLocationId);
+      const selectedBook = books.find((book) => book._id === currentBookId);
+
+      const req_data = {"location_id":selectedLocation._id, "book_id":selectedBook._id, "location_name":selectedLocation.name, "book_title":selectedBook.title}
+
+      try {
+        const response = await axios.post('http://127.0.0.1:5000/stores/create', req_data);
+
+        // Update the local state with the new location-book pair
+        setLocationBookPairs([
+          ...locationBookPairs,
+          {_id:response.data, location_id: selectedLocation._id, book_id: selectedBook._id, location_name:selectedLocation.name, book_title:selectedBook.title },
+        ]);
+        setCurrentLocationId('');
+        setCurrentBookId('');
+
+      } catch (error) {
+        console.error('Error fetching books:', error);
+      }
+
+    } else {
+      alert('Please select both location and book.');
+    }
   };
 
-  const handleAddPair = () => {
-    // Update the state using the selected store's ID
-    setStorePairs({
-      ...storePairs,
-      [selectedStore.id]: [...(storePairs[selectedStore.id] || []), { book: '', location: '' }],
-    });
+  const deleteLocationBookPair = async (pairIndex) => {
+    const pairToDelete = locationBookPairs[pairIndex];
+
+    try {
+      await axios.delete(`http://127.0.0.1:5000/stores/delete/${pairToDelete._id}`);
+
+      setLocationBookPairs((prevPairs) =>
+        prevPairs.filter((pair, index) => index !== pairIndex)
+      );
+    } catch (error) {
+      console.error('Error deleting location-book pair:', error);
+    }
   };
 
-  const handleDeletePair = (index) => {
-    // Update the state using the selected store's ID
-    const updatedPairs = [...storePairs[selectedStore.id]];
-    updatedPairs.splice(index, 1);
-    setStorePairs({ ...storePairs, [selectedStore.id]: updatedPairs });
-  };
-
-  const handleSubmit = () => {
-    // Handle saving the pairs to the backend or perform other necessary actions
-    // ...
-
-    // Close the modal
-    setModalOpen(false);
-  };
+  const availableBooks = books.filter(
+    (book) => !locationBookPairs.some((pair) => pair.book_id === book._id)
+  );
 
   return (
-    <div style={{ maxWidth: '800px', margin: 'auto', padding: '20px' }}>
-      {stores.map((store) => (
-        <div
-          key={store.id}
-          style={{
-            border: '1px solid #ddd',
-            borderRadius: '5px',
-            padding: '20px',
-            marginBottom: '20px',
-            backgroundColor: '#f8f9fa',
-          }}
-        >
-          <h3 style={{ marginBottom: '10px', color: '#007BFF' }}>{store.name}</h3>
-          <p style={{ marginBottom: '15px', color: '#6c757d' }}>Location: {store.location}</p>
-          <p style={{ marginBottom: '5px', color: '#007BFF' }}>Books:</p>
-          <ul style={{ listStyle: 'none', padding: '0' }}>
-            {storePairs[store.id]?.map((pair, index) => (
-              <li
-                key={index}
-                style={{
-                  marginBottom: '10px',
-                  padding: '8px',
-                  border: '1px solid #ddd',
-                  borderRadius: '5px',
-                  backgroundColor: '#fff',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                }}
-              >
-                <span>
-                  Book: {pair.book}, Location: {pair.location}
-                </span>
-                <button
-                  onClick={() => handleDeletePair(index)}
-                  style={{
-                    padding: '8px',
-                    backgroundColor: '#dc3545',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: '5px',
-                    cursor: 'pointer',
-                  }}
-                >
-                  Delete
-                </button>
-              </li>
-            ))}
-          </ul>
-          <button
-            onClick={() => openModalForEdit(store)}
-            style={{
-              padding: '10px',
-              backgroundColor: '#007BFF',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '5px',
-              cursor: 'pointer',
-            }}
+    <div style={{ fontFamily: 'Arial, sans-serif', maxWidth: '600px', margin: 'auto' }}>
+      <h2 style={{ color: '#333', borderBottom: '2px solid #333', paddingBottom: '10px' }}>
+        Stores
+      </h2>
+      <div style={{ marginBottom: '20px' }}>
+        <label style={{ marginRight: '10px' }}>
+          Location:
+          <select
+            value={currentLocationId}
+            onChange={(e) => setCurrentLocationId(e.target.value)}
+            style={{ marginLeft: '10px' }}
           >
-            Edit
-          </button>
-        </div>
-      ))}
+            <option value="">Select Location</option>
+            {locations.map((location) => (
+              <option key={location._id} value={location._id}>
+                {location.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label style={{ marginRight: '10px' }}>
+          Book:
+          <select
+            value={currentBookId}
+            onChange={(e) => setCurrentBookId(e.target.value)}
+            style={{ marginLeft: '10px' }}
+          >
+            <option value="">Select Book</option>
+            {availableBooks.map((book) => (
+              <option key={book._id} value={book._id}>
+                {book.title}
+              </option>
+            ))}
+          </select>
+        </label>
+        <button
+          onClick={addBookToLocation}
+          style={{ marginLeft: '10px', padding: '5px 10px', cursor: 'pointer' }}
+        >
+          Add Book
+        </button>
+      </div>
 
-      {/* Modal for editing book-location pairs */}
-      {isModalOpen && (
-        <div
+      <h3 style={{ color: '#333' }}>Location-Book Pairs</h3>
+      <ul>
+        {locationBookPairs.map((pair, index) => (
+          <li
+          key={index}
           style={{
-            position: 'fixed',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            backgroundColor: '#fff',
-            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-            zIndex: '999',
-            borderRadius: '5px',
-            width: '300px',
-            padding: '20px',
+            marginBottom: '5px',
+            padding: '5px',
+            border: '1px solid #ccc',
+            borderRadius: '3px',
+            display: 'flex',
+            justifyContent: 'space-between',
           }}
         >
-          <h2 style={{ marginBottom: '20px', color: '#007BFF' }}>
-            Edit Book-Location Pairs for {selectedStore.name}
-          </h2>
-          <ul style={{ listStyle: 'none', padding: '0', marginBottom: '20px' }}>
-            {storePairs[selectedStore.id]?.map((pair, index) => (
-              <li
-                key={index}
-                style={{
-                  marginBottom: '10px',
-                  padding: '8px',
-                  border: '1px solid #ddd',
-                  borderRadius: '5px',
-                  backgroundColor: '#fff',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                }}
-              >
-                <span>
-                  Book:{' '}
-                  <select
-                    value={pair.book}
-                    onChange={(e) => {
-                      const updatedPairs = [...storePairs[selectedStore.id]];
-                      updatedPairs[index].book = e.target.value;
-                      setStorePairs({ ...storePairs, [selectedStore.id]: updatedPairs });
-                    }}
-                    style={{ marginLeft: '5px', width: '100px' }}
-                  >
-                    <option value="">Select Book</option>
-                    {books.map((book) => (
-                      <option key={book} value={book}>
-                        {book}
-                      </option>
-                    ))}
-                  </select>
-                  , Location:{' '}
-                  <select
-                    value={pair.location}
-                    onChange={(e) => {
-                      const updatedPairs = [...storePairs[selectedStore.id]];
-                      updatedPairs[index].location = e.target.value;
-                      setStorePairs({ ...storePairs, [selectedStore.id]: updatedPairs });
-                    }}
-                    style={{ marginLeft: '5px', width: '100px' }}
-                  >
-                    <option value="">Select Location</option>
-                    {locations.map((location) => (
-                      <option key={location} value={location}>
-                        {location}
-                      </option>
-                    ))}
-                  </select>
-                </span>
-                <button
-                  onClick={() => handleDeletePair(index)}
-                  style={{
-                    padding: '8px',
-                    backgroundColor: '#dc3545',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: '5px',
-                    cursor: 'pointer',
-                  }}
-                >
-                  Delete
-                </button>
-              </li>
-            ))}
-          </ul>
-          <button
-            onClick={handleAddPair}
-            style={{
-              padding: '10px',
-              backgroundColor: '#007BFF',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '5px',
-              cursor: 'pointer',
-            }}
-          >
-            Add Pair
-          </button>
-          <button
-            onClick={handleSubmit}
-            style={{
-              padding: '10px',
-              backgroundColor: '#007BFF',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '5px',
-              cursor: 'pointer',
-              marginLeft: '10px',
-            }}
-          >
-            Save Changes
-          </button>
-          <button
-            onClick={() => setModalOpen(false)}
-            style={{
-              padding: '10px',
-              backgroundColor: '#dc3545',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '5px',
-              cursor: 'pointer',
-              marginLeft: '10px',
-            }}
-          >
-            Cancel
-          </button>
-        </div>
-      )}
+          <span>{pair.location_name} - {pair.book_title}</span>
+          <div>
+            <button
+              onClick={() => deleteLocationBookPair(index)}
+              style={{ marginRight: '5px', cursor: 'pointer' }}
+            >
+              Delete
+            </button>
+            {/* Add an edit button here with appropriate functionality */}
+          </div>
+        </li>
+        ))}
+      </ul>
     </div>
   );
 };

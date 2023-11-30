@@ -17,13 +17,26 @@ def serialize_doc(doc):
 @stores_bp.route("/create", methods=["POST"])
 def create_store():
     data = request.json
-    location_name = serialize_doc(mongo.db.locations.find_one({'_id':ObjectId(data['location_id'])}))['name']
-    book_name = serialize_doc(mongo.db.books.find_one({'_id':ObjectId(data['book_id'])}))['title']
+    print(data)
+    # location_name = serialize_doc(mongo.db.locations.find_one({'_id':ObjectId(data['location_id'])}))['name']
+    # book_name = serialize_doc(mongo.db.books.find_one({'_id':ObjectId(data['book_id'])}))['title']
     store_data = {
         "location_id":data['location_id'],
         "book_id":data["book_id"],
-        "location_name":location_name,
-        "book_name":book_name
+        "location_name":data["location_name"],
+        "book_title":data["book_title"]
     }
     inserted_rec = mongo.db.stores.insert_one(store_data)
     return str(inserted_rec.inserted_id), 200
+
+@stores_bp.route("/fetch", methods=["GET"])
+def fetch_stores():
+    stores = mongo.db.stores.find()
+    stores = [serialize_doc(doc) for doc in stores]
+    return stores, 200
+
+@stores_bp.route("/delete/<store_id>", methods=["DELETE"])
+def delete_store(store_id):
+    print(store_id)
+    mongo.db.stores.delete_one({'_id':ObjectId(store_id)})
+    return "Deleted Successfully", 200

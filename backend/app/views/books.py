@@ -18,7 +18,7 @@ def add_book():
     data = request.json
     book = {
         "title":data["title"],
-        "author":data["author"],
+        "author":data["author"].split(', '),
         "description":data["description"],
         "genre": data["genre"],
         "published_year":data["published_year"],
@@ -48,34 +48,37 @@ def delete_book(id):
 @books_bp.route('/search', methods=['GET'])
 def search_by_item():
     # print(request.args)
-    search_key = request.args.get('searchKey')
-    # print(search_key)
+
     search_val = request.args.get('searchVal')
-    # print(search_val)
+    location = request.args.get('location')
+
     regex = re.compile(f'.*{search_val}.*', re.IGNORECASE)
-    docs = mongo.db.books.find({search_key:{'$regex': regex}})
+
+    docs = mongo.db.stores.find({"location_name":location, 'book_title':{'$regex':regex}})
+
     docs = [serialize_doc(doc) for doc in docs]
-    
-    for doc in docs:
-        obj = serialize_doc(mongo.db.stores.find_one({'book_id':doc['_id']}))
-        if obj:
-            doc["location_name"] = serialize_doc(obj)['location_name']
-        else:
-            doc["location_name"] = "NA"
+
+    print("***************************************************************************************")
     print(docs)
-    return docs, 200
+
+    if(not docs):
+        docs = mongo.db.stores.find({"book_title":{'$regex':regex}})
+
+
+    docs = [serialize_doc(doc) for doc in docs]
+    print("***************************************************************************************")
+    print(docs)
+    updated_docs = []
+    for doc in docs:
+        book = serialize_doc(mongo.db.books.find_one({'_id':ObjectId(doc['book_id'])}))
+        book.pop('_id')
+        book.pop('title')
+        doc = doc | book
+        updated_docs.append(doc)
+    return updated_docs, 200
 
 @books_bp.route('/init', methods=["GET"])
 def load_dummy_books():
     mongo.db.books.insert_many(books)
     mongo.db.locations.insert_many(locations)
-    books_dta = mongo.db.books.find()
-    locations_dta = mongo.db.locations.find()
-    books_data = [serialize_doc(book) for book in books_dta]
-    locations_data = [serialize_doc(location) for location in locations_dta]
-    data = {"book_id":books_data[0]["_id"], "location_id":locations_data[0]["_id"], "location_name":locations_data[0]["name"], "book_name":books_data[0]["title"]}
-    mongo.db.stores.insert_one(data)
-
-    data = {"book_id":books_data[1]["_id"], "location_id":locations_data[1]["_id"], "location_name":locations_data[1]["name"], "book_name":books_data[1]["title"]}
-    mongo.db.stores.insert_one(data)
     return "true", 200

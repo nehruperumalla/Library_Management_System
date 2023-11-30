@@ -70,4 +70,3 @@ locations = [
         "zipcode": "70165"
     }
 ]
-

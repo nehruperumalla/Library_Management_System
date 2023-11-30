@@ -44,6 +44,6 @@ def update_transaction():
 
 @transaction_bp.route("/search/<user_id>", methods=["GET"])
 def search_transactions_by_id(user_id):
-    print(user_id)
+    print("user_id", user_id)
     data = mongo.db.transactions.find({'user_id':ObjectId(user_id)})
     return [serialize_doc(item) for item in data], 200
