@@ -45,7 +45,7 @@ const MyBooks = () => {
 
   const calculateLateFee = (checkinDate) => {
     const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 15);
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 2);
 
     const checkinDateObj = new Date(checkinDate);
     const timeDiff = sevenDaysAgo.getTime() - checkinDateObj.getTime();
@@ -60,11 +60,12 @@ const MyBooks = () => {
     
     let bookId = book.book_id
     const selectedLocation = selectedLocations[bookId];
+    console.log(book)
 
+    setSelectedBook({'book':book, 'transaction':trans});
     if (bookId && selectedLocation) {
       // Perform checkout logic here
       let lateFee = calculateLateFee(book.checkin_time)
-      setSelectedBook({'book':book, 'transaction':trans});
       if(lateFee > 0) {
         setPaymentDetails((prevDetails) => ({
           ...prevDetails,
@@ -73,28 +74,9 @@ const MyBooks = () => {
         // Open the payment modal
         setShowModal(true);
       }
+      // await new Promise(resolve => setTimeout(resolve, 1000));
+      performCheckout_2(book, trans)
 
-      // // Update userBooks after checkout
-      // const updatedUserBooks = userBooks.map((books) => {
-      //   return {
-      //     ...books,
-      //     books: books.books.filter((book) => book._id !== bookId),
-      //   };
-      // });
-      // setUserBooks(updatedUserBooks);
-
-      // // Remove the selected location for the checked-out book
-      // setSelectedLocations((prevSelectedLocations) => {
-      //   const updatedLocations = { ...prevSelectedLocations };
-      //   delete updatedLocations[bookId];
-      //   return updatedLocations;
-      // });
-
-      // // Reset the checkout warning state for the specific book
-      // setCheckoutWarnings((prevCheckoutWarnings) => ({
-      //   ...prevCheckoutWarnings,
-      //   [bookId]: false,
-      // }));
     } else {
       console.log("Not selected location")
 
@@ -160,7 +142,8 @@ const MyBooks = () => {
   };
 
   const performCheckout = async() => {
-
+    try {
+    console.log(selectedBook)
     const return_location = checkoutLocations.filter(location => location._id === selectedLocations[selectedBook['book']['book_id']])
     console.log(return_location)
     let req_data = {
@@ -169,7 +152,29 @@ const MyBooks = () => {
       "returned_location":return_location[0]['name']
     }
     console.log(req_data)
+
+      const response = await axios.post('http://127.0.0.1:5000/transactions/checkout', req_data)
+      console.log("After Checking out")
+      console.log(response.data)
+      setUserBooks(response.data);
+
+    } catch(error) {
+      console.error("Error Occured while checking out", error)
+    }
+  }
+
+  const performCheckout_2 = async(book, trans) => {
     try {
+    console.log(selectedBook)
+    const return_location = checkoutLocations.filter(location => location._id === selectedLocations[book['book_id']])
+    console.log(return_location)
+    let req_data = {
+      "_id":trans['_id'],
+      'book_id':book['book_id'],
+      "returned_location":return_location[0]['name']
+    }
+    console.log(req_data)
+
       const response = await axios.post('http://127.0.0.1:5000/transactions/checkout', req_data)
       console.log("After Checking out")
       console.log(response.data)
