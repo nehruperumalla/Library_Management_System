@@ -45,7 +45,7 @@ const MyBooks = () => {
 
   const calculateLateFee = (checkinDate) => {
     const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 2);
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 15);
 
     const checkinDateObj = new Date(checkinDate);
     const timeDiff = sevenDaysAgo.getTime() - checkinDateObj.getTime();
