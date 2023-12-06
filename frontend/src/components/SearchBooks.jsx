@@ -126,7 +126,8 @@ const SearchBooks = () => {
       {searchResults.length > 0 && (
         <div style={{ marginTop: '20px' }}>
           <h2>Search Results:</h2>
-          {searchResults.map((result) => (
+          {searchResults
+            .filter(result => result.location_name === selectedLocation).map((result) => (
             <div
               key={result._id}
               onClick={() => handleResultClick(result)}
@@ -138,25 +139,27 @@ const SearchBooks = () => {
                 cursor: 'pointer',
               }}
             >
-              <h3>{result.book_title}</h3>
-              <p>{result.description}</p>
-              <p>Authors: {result.author.join(', ')}</p>
-              <p>Published Year: {result.published_year}</p>
-              <p>Available at: {result.location_name}</p>
-              {result.location_name === selectedLocation && (
-                <button
-                  onClick={() => addToCart(result)}
-                  style={{
-                    padding: '8px 12px',
-                    backgroundColor: '#4CAF50',
-                    color: 'white',
-                    border: 'none',
-                    cursor: 'pointer',
-                  }}
-                >
-                  Add to Cart
-                </button>
-              )}
+            <>    
+            <h3>{result.book_title}</h3>
+            <p>{result.description}</p>
+            <p>Authors: {result.author.join(', ')}</p>
+            <p>Published Year: {result.published_year}</p>
+            <p>Available at: {result.location_name}</p>
+
+            <button
+              onClick={() => addToCart(result)}
+              style={{
+                padding: '8px 12px',
+                backgroundColor: '#4CAF50',
+                color: 'white',
+                border: 'none',
+                cursor: 'pointer',
+              }}
+            >
+              Add to Cart
+            </button>
+            </>
+              
             </div>
           ))}
         </div>

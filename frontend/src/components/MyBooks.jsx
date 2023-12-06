@@ -220,7 +220,7 @@ const MyBooks = () => {
                 <>
                   <p>Late Fee: $0</p>
                   <p>Check-out Date: {new Date(book.checkout_time).toLocaleString()}</p>
-                  <p>Check-out Location: {book.returned_location}</p>
+                  <p>Returned Location: {book.returned_location}</p>
                 </>) : (
                 <>
                    <p>Late Fee: ${calculateLateFee(book.checkin_time)}</p>
