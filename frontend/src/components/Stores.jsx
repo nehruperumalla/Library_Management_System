@@ -134,7 +134,7 @@ const Stores = () => {
 
       <h3 style={{ color: '#333' }}>Location-Book Pairs</h3>
       <ul>
-        {locationBookPairs.map((pair, index) => (
+        {currentLocationId ? locationBookPairs.filter(book_pair => book_pair.location_id === currentLocationId).map((pair, index) => (
           <li
           key={index}
           style={{
@@ -157,7 +157,31 @@ const Stores = () => {
             {/* Add an edit button here with appropriate functionality */}
           </div>
         </li>
-        ))}
+        ))
+      : locationBookPairs.map((pair, index) => (
+        <li
+        key={index}
+        style={{
+          marginBottom: '5px',
+          padding: '5px',
+          border: '1px solid #ccc',
+          borderRadius: '3px',
+          display: 'flex',
+          justifyContent: 'space-between',
+        }}
+      >
+        <span>{pair.location_name} - {pair.book_title}</span>
+        <div>
+          <button
+            onClick={() => deleteLocationBookPair(index)}
+            style={{ marginRight: '5px', cursor: 'pointer' }}
+          >
+            Delete
+          </button>
+          {/* Add an edit button here with appropriate functionality */}
+        </div>
+      </li>
+      ))}
       </ul>
     </div>
   );
